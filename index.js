@@ -213,11 +213,11 @@ function deleteNoIndexFields(data){
 function isNumber(input){
   var numb = parseInt(input);
 
-  if (isNaN(numb)){
+  if (!isNaN(numb)){
     return numb;
   }
 
-  return true;
+  return false;
 
 }
 
