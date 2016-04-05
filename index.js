@@ -90,7 +90,7 @@ if (scanDir){
 
   if (!exists(scanDir)) return console.log('Path does not exist', scanDir);
 
-  indexer.scan('./img/', logfile, function (err, stats){
+  indexer.scan(scanDir, logfile, function (err, stats){
     if (!indexAfterScan){
       var total  = stats.folders.length + stats.files.length;
       return console.log([
