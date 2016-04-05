@@ -193,6 +193,12 @@ function IndexToElasticsearch(data, id,  callback){
   client.index({
     index: config.index || 'images',
     type: 'image',
-    body: data
-  }, callback);
+    body: data,
+    id : id
+  }, function (err, data){
+    if (err) console.log(err);
+
+    callback(null, data);
+
+  });
 }
