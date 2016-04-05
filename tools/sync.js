@@ -96,10 +96,7 @@ function ReadLogFileSync(filename){
 }
 
 function logToFile(data, callback){
-  var now = new Date().toISOString();
-  var log = { time : now, data : data };
-
-  var json = JSON.stringify(log)  + '\n';
+  var json = JSON.stringify(data)  + '\n';
   fs.appendFile(filename, json, function (err, res){
     if (err) console.log('Error reporting error', err);
     callback();
