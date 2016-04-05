@@ -8,7 +8,7 @@ var path = require('path');
 var async = require('async');
 var argv = require('yargs').argv;
 
-var now = new Date().toISOString();
+var now = new Date().toISOString().replace(/:/g, '_');
 
 var config = require('../config.js');
 
