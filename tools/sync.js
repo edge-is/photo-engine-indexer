@@ -57,7 +57,7 @@ if (typeof scanDir === 'string'){
     ].join('\n'));
 
     syncStart(stats.files, function (err, res){
-      console.log('Done',  err, res);
+      console.log('Done',  err);
     });
   });
 }else{
@@ -146,36 +146,45 @@ function es_exists(index, type, id, callback){
     type: type,
     id: id
   }, function (error, response) {
-    if(error) return callback('exists', error, response);
+    if (response.found === false) return callback(true, response);
+
+    if (error) console.error('Unkown error', error);
     callback(error, response);
   });
 }
 
 function syncStart(array, callback){
+  callback = callback || function (){};
 
   if (fromTimestamp){
     array = onlyNewItems(array, fromTimestamp);
-    return ;
   }
 
-  callback = callback || function (){};
+  var noneExisting = [];
+
+
   async.forEachLimit(array, 4, function (item, next){
 
     if (item.type === 'directory') return next();
 
     var filename = item.stats.name.split('.').shift();
-
     var id_hash = md5(filename);
-
     es_exists(index, 'image', id_hash, function (err, res){
-      if (!err) return next();
-      console.log(filename, 'does not exist');
-      logToFile(item, next);
-    })
+      if (err === true) {
+        console.log(filename, id_hash, 'does not exist');
+        noneExisting.push(item);
+        return logToFile(item, next);
+      }
+      return next();
+
+    });
 
     // next();
   }, function (){
-    console.log('Done with:', array.length)
-    callback(null, array.length);
+    console.log('None existing', noneExisting.length);
+    callback(null, {
+      totalItems : array.length,
+      noneExisting : noneExisting
+    });
   })
 }
