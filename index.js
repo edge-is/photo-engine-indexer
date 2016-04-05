@@ -214,7 +214,7 @@ function isNumber(input){
   var numb = parseInt(input);
 
   if (isNaN(numb)){
-    return false;
+    return numb;
   }
 
   return true;
@@ -225,8 +225,10 @@ function enforceEpochs(data){
   expected_epochs.forEach(function (key){
 
     var value = data[key];
-    if(!isNumber(value)){
-      data[key] = 0;
+    var numb = isNumber(value);
+
+    if(!numb){
+      data[key] = numb;
       data[key + '-original'] = value;
     }
 
