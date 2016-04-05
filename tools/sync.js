@@ -22,6 +22,19 @@ var scanlog = ['../logs/', 'all-files-', now, '.log'].join('');
 
 var moment = require('moment');
 
+
+
+var slug = require('slug');
+
+slug.defaults.modes['pretty'] = {
+    replacement: '-',
+    symbols: true,
+    remove: /[.]/g,
+    lower: true,
+    charmap: slug.charmap,
+    multicharmap: slug.multicharmap
+};
+
 function md5(string){
   return crypto.createHash('md5')
                .update(string)
@@ -168,10 +181,10 @@ function syncStart(array, callback){
     if (item.type === 'directory') return next();
 
     var filename = item.stats.name.split('.').shift();
-    var id_hash = md5(filename);
-    es_exists(index, 'image', id_hash, function (err, res){
+    var slugged = slug(filename);
+    es_exists(index, 'image', slugged, function (err, res){
       if (err === true) {
-        console.log(filename, id_hash, 'does not exist');
+        console.log(filename, slugged, 'does not exist');
         noneExisting.push(item);
         return logToFile(item, next);
       }

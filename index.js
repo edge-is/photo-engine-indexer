@@ -21,6 +21,8 @@ var exifjs = require('exifjs');
 
 var config = GetConfig(conf) || {};
 
+var u = require('./lib/utils.js');
+
 exif = new exifjs(config.exiftool);
 
 
@@ -170,7 +172,7 @@ function IndexArray(array, callback){
     var file = item.path;
     var parsed = path.parse(file);
 
-    var NameHash = md5(parsed.name);
+    var fileId = u.slug(parsed.name);
     if (isImage(parsed.ext)){
 
 
@@ -188,11 +190,9 @@ function IndexArray(array, callback){
         if (obj){
           obj.archive = archive;
           obj.filename = parsed.name;
-          obj.name_hash = NameHash;
         }
 
-
-        IndexToElasticsearch(obj, NameHash, function (err, resp){
+        indexToElasticsearch(obj, fileId, function (err, resp){
           var now = + new Date();
           AddToWorklog({ file : file, date : now }, next);
         });
@@ -249,7 +249,7 @@ function enforceEpochs(data){
   return data;
 }
 
-function IndexToElasticsearch(data, id,  callback){
+function indexToElasticsearch(data, id,  callback){
 
 
   data = deleteNoIndexFields(data);
