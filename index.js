@@ -227,6 +227,8 @@ function enforceEpochs(data){
     var value = data[key];
     var numb = isNumber(value);
 
+    if (numb === false) numb = 0;
+
     if(!numb){
       data[key] = numb;
       data[key + '-original'] = value;
