@@ -85,6 +85,11 @@ function ReadLogFileSync(filename){
 
 if (scanDir){
   logfile = logfile || 'scanlog.log';
+
+  if (typeof scanDir !=='string') return console.log('path needs to be string');
+
+  if (!exists(scanDir)) return console.log('Path does not exist', scanDir);
+
   indexer.scan('./img/', logfile, function (err, stats){
     if (!indexAfterScan){
       var total  = stats.folders.length + stats.files.length;
