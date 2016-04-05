@@ -138,7 +138,7 @@ function IndexArray(array, callback){
     var file = item.path;
     var parsed = path.parse(file);
 
-    var fileId = md5(parsed.name);
+    var NameHash = md5(parsed.name);
     if (isImage(parsed.ext)){
 
 
@@ -156,11 +156,11 @@ function IndexArray(array, callback){
         if (obj){
           obj.archive = archive;
           obj.filename = parsed.name;
-          obj._id = fileId;
+          obj.name_hash = NameHash;
         }
 
 
-        IndexToElasticsearch(obj, fileId, function (err, resp){
+        IndexToElasticsearch(obj, NameHash, function (err, resp){
           var now = + new Date();
           AddToWorklog({ file : file, date : now }, next);
         });
