@@ -32,6 +32,15 @@ function md5(string){
 }
 
 
+var expected_epochs = [
+  "ProfileDateTime",
+  "ReleaseDate",
+  "DateCreated",
+  "FileAccessDate",
+  "FileCreateDate",
+  "FileModifyDate"
+];
+
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client(config.elasticsearch);
 
@@ -44,6 +53,21 @@ function GetConfig(path){
   } catch (e) {
     return false;
   }
+}
+
+function es_errors(data, callback){
+  var now = new Date().toISOString();
+  var log = { time : now, data : data };
+
+  var json = JSON.stringify(log)  + '\n';
+
+  fs.appendFile('logs/es-errors.log', json, function (err, res){
+    if (err) console.log('Error reporting error', err);
+
+    callback();
+  })
+
+
 }
 
 function AddToWorklog(data, callback){
@@ -185,18 +209,51 @@ function deleteNoIndexFields(data){
   return data;
 }
 
+function isNumber(input){
+  var numb = parseInt(number);
+
+  if (isNaN(numb)){
+    return false;
+  }
+
+  return true;
+
+}
+
+function enforceEpochs(data){
+  expected_epochs.forEach(function (key){
+
+    var value = data[key];
+    if(!isNumber(value)){
+      data[key] = 0;
+      data[key + '-original'] = value;
+    }
+
+  });
+
+  return data;
+}
+
 function IndexToElasticsearch(data, id,  callback){
 
 
   data = deleteNoIndexFields(data);
 
-  client.index({
+  data = enforceEpochs(data);
+
+
+  var body = {
     index: config.index || 'images',
     type: 'image',
     body: data,
     id : id
-  }, function (err, data){
-    if (err) console.log(err);
+  };
+
+  client.index(body, function (err, data){
+    if (err) {
+      console.log(err);
+      return  es_errors(body, callback)
+    }
 
     callback(null, data);
 
