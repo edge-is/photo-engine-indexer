@@ -23,6 +23,13 @@ var config = GetConfig(conf) || {};
 
 exif = new exifjs(config.exiftool);
 
+
+var now = new Date().toISOString().replace(/:/g, '_');
+
+var workLogFile = ['logs/', 'worklog-', now, '.log'].join('');
+
+var scanLogFile = ['logs/', 'scan-all-', now, '.log'].join('');
+
 var crypto = require('crypto');
 
 function md5(string){
@@ -71,7 +78,7 @@ function es_errors(data, callback){
 }
 
 function AddToWorklog(data, callback){
-  worklog = worklog || 'worklog.log';
+  worklog = worklog || workLogFile;
   var string = JSON.stringify(data) + '\n';
   fs.appendFile(worklog, string, callback);
 }
@@ -108,7 +115,7 @@ function ReadLogFileSync(filename){
 }
 
 if (scanDir){
-  logfile = logfile || 'scanlog.log';
+  logfile = logfile || scanLogFile;
 
   if (typeof scanDir !=='string') return console.log('path needs to be string');
 
@@ -195,9 +202,13 @@ function IndexArray(array, callback){
     }
 
   }, function (){
-    console.log('Array is done');
+    console.log('Array is done', {
+      worklog : workLogFile,
+      scanlog : scanLogFile
+    });
   });
 }
+
 
 function deleteNoIndexFields(data){
   if (!config.metadata) return data;

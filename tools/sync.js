@@ -20,6 +20,8 @@ var filename = ['../logs/', 'es-sync-', now, '.log'].join('');
 
 var scanlog = ['../logs/', 'all-files-', now, '.log'].join('');
 
+var moment = require('moment');
+
 function md5(string){
   return crypto.createHash('md5')
                .update(string)
@@ -31,6 +33,12 @@ var scanDir = argv.s || false;
 var logfile = argv.f || false;
 
 index = (typeof argv.i === 'string') ? argv.i : index;
+
+
+var fromTimestamp = argv.t || false;
+
+
+fromTimestamp = parseTimestmap(fromTimestamp);
 
 
 var elasticsearch = require('elasticsearch');
@@ -59,9 +67,38 @@ if (typeof scanDir === 'string'){
   var array = ReadLogFileSync(logfile);
 
   syncStart(array, function (err, res){
-    console.log('Done', err, res);
+    console.log('Done', {err, res});
+
+    console.log({
+      filename :filename,
+      scanlog : scanlog
+    })
   })
 
+}
+
+function parseTimestmap(timestamp){
+
+  if (!moment(timestamp).isValid()){
+    return false;
+  }
+
+  return +moment(timestamp);
+}
+
+function onlyNewItems(array, fromTimestamp){
+  var newFiles = array.filter(function (item){
+    var epoch = ((+item.stats.mtime) >= (+item.stats.ctime)) ? item.stats.mtime : item.stats.ctime;
+
+    var modified = epoch.getTime();
+
+    if (modified > fromTimestamp){
+      return true;
+    }
+
+    return false;
+
+  });
 }
 
 
@@ -115,6 +152,12 @@ function es_exists(index, type, id, callback){
 }
 
 function syncStart(array, callback){
+
+  if (fromTimestamp){
+    array = onlyNewItems(array, fromTimestamp);
+    return ;
+  }
+
   callback = callback || function (){};
   async.forEachLimit(array, 4, function (item, next){
 
