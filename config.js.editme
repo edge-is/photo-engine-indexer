@@ -1,3 +1,10 @@
 module.exports = {
-  index : ''
+  index : 'index',
+  elasticsearch : {
+    host: 'localhost:9200'
+  },
+  metadata : {
+    noindex : ['Directory', 'SourceFile', 'StripOffsets', 'DocumentName','JPEGTables', 'FilePermissions']
+  },
+  exiftool : { exiftool : "c:\\temp\\exiftool.exe"}
 };
