@@ -154,11 +154,12 @@ function getArchivename(filepath){
 }
 
 function IndexArray(array, callback){
+  var workers = config.workers || 4;
 
   callback = callback || function (){};
-  console.log('Starting indexing files', array.length);
+  console.log('Starting indexing files with workers', workers , array.length);
 
-  async.forEachLimit(array, 4, function (item, next){
+  async.forEachLimit(array, workers, function (item, next){
     var file = item.path;
     var parsed = path.parse(file);
 
@@ -210,7 +211,7 @@ function deleteNoIndexFields(data){
 }
 
 function isNumber(input){
-  var numb = parseInt(number);
+  var numb = parseInt(input);
 
   if (isNaN(numb)){
     return false;
