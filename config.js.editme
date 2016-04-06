@@ -4,7 +4,26 @@ module.exports = {
     host: 'localhost:9200'
   },
   metadata : {
-    noindex : ['Directory', 'SourceFile', 'StripOffsets', 'DocumentName','JPEGTables', 'FilePermissions']
+    noindex : [
+      'NativeDigest',
+      'DocumentID',
+      'StripByteCounts',
+      'ReferenceBlackWhite',
+      'XMPToolkit',
+      'ApplicationRecordVersion',
+      'PageNumber',
+      'SampleFormat',
+      'Directory',
+      'SourceFile',
+      'StripOffsets',
+      'DocumentName',
+      'JPEGTables',
+      'FilePermissions',
+      'BitsPerSample'
+    ]
+
   },
-  exiftool : { exiftool : "c:\\temp\\exiftool.exe"}
+  exiftool : { exiftool : "c:\\temp\\exiftool.exe"},
+  workers : 10
+
 };

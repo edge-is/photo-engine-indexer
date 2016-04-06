@@ -178,21 +178,23 @@ function IndexArray(array, callback){
 
       var archive = getArchivename(file);
 
-      console.log('file', archive, '/', parsed.base);
+
       exif.get(file, function (err, metadata){
         if (err) {
-          console.log('error getting metadata', err);
+          console.log('error getting metadata', file, err);
           return next();
         }
 
         var obj = metadata.pop();
-
+        var now = new Date().getTime();
         if (obj){
+          obj.indexed_epoch = now;
           obj.archive = archive;
           obj.filename = parsed.name;
         }
 
         indexToElasticsearch(obj, fileId, function (err, resp){
+          console.log('Indexed', [archive, parsed.base].join('/'), fileId );
           var now = + new Date();
           AddToWorklog({ file : file, date : now }, next);
         });
@@ -251,12 +253,9 @@ function enforceEpochs(data){
 
 function indexToElasticsearch(data, id,  callback){
 
-
   data = deleteNoIndexFields(data);
 
   data = enforceEpochs(data);
-
-
   var body = {
     index: config.index || 'images',
     type: 'image',
