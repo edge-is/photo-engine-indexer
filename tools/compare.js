@@ -1,4 +1,4 @@
-var indexer = require('./lib/indexer.js');
+var indexer = require('../lib/indexer.js');
 
 var fs = require('fs');
 var path = require('path');
