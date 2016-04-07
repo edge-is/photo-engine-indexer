@@ -70,7 +70,7 @@ if (typeof scanDir === 'string'){
     ].join('\n'));
 
     syncStart(stats.files, function (err, res){
-      console.log('Done',  err);
+      console.log('Done', err);
     });
   });
 }else{
@@ -80,7 +80,7 @@ if (typeof scanDir === 'string'){
   var array = ReadLogFileSync(logfile);
 
   syncStart(array, function (err, res){
-    console.log('Done', {err, res});
+    console.log('Done', err, res);
 
     console.log({
       filename :filename,

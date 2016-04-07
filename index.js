@@ -82,7 +82,15 @@ function es_errors(data, callback){
 function AddToWorklog(data, callback){
   worklog = worklog || workLogFile;
   var string = JSON.stringify(data) + '\n';
-  fs.appendFile(worklog, string, callback);
+
+  fs.appendFile(worklog, string, function (err, res){
+    if (err) {
+      console.log('Error appending to file', err);
+      return callback(err);
+    }
+
+    callback();
+  });
 }
 
 
@@ -124,6 +132,7 @@ if (scanDir){
   if (!exists(scanDir)) return console.log('Path does not exist', scanDir);
 
   indexer.scan(scanDir, logfile, function (err, stats){
+    console.log('Search for files in ', scanDir);
     if (!indexAfterScan){
       var total  = stats.folders.length + stats.files.length;
       return console.log([
@@ -165,6 +174,7 @@ function getArchivename(filepath){
 function IndexArray(array, callback){
   var workers = config.workers || 4;
 
+
   callback = callback || function (){};
   console.log('Starting indexing files with workers', workers , array.length);
 
@@ -174,12 +184,8 @@ function IndexArray(array, callback){
 
     var fileId = u.slug(parsed.name);
     if (isImage(parsed.ext)){
-
-
       var archive = getArchivename(file);
-
-
-      exif.get(file, function (err, metadata){
+      return exif.get(file, function (err, metadata){
         if (err) {
           console.log('error getting metadata', file, err);
           return next();
@@ -194,14 +200,16 @@ function IndexArray(array, callback){
         }
 
         indexToElasticsearch(obj, fileId, function (err, resp){
-          console.log('Indexed', [archive, parsed.base].join('/'), fileId );
           var now = + new Date();
           AddToWorklog({ file : file, date : now }, next);
+          //
         });
       });
-    }else{
-      next();
     }
+
+    console.log('NOT AN IMAGE', item.path)
+    return next();
+
 
   }, function (){
     console.log('Array is done', {
@@ -268,6 +276,7 @@ function indexToElasticsearch(data, id,  callback){
       console.log(err);
       return  es_errors(body, callback)
     }
+    console.log('Indexed to ', body.index, 'and type', body.type, 'with id', id);
 
     callback(null, data);
 
