@@ -20,12 +20,12 @@ function writeLog(logfile, item, callback){
 }
 
 function writeModified(array, callback){
-  forEachLimit(array, 1, function (item, next){
+  async.forEachLimit(array, 1, function (item, next){
     writeLog(logFileModified, item, next);
   },callback)
 }
 function writeNew(array, callback){
-  forEachLimit(array, 1, function (item, next){
+  async.forEachLimit(array, 1, function (item, next){
     writeLog(logFileNew, item, next);
   },callback)
 }
