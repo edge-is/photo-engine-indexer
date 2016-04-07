@@ -14,6 +14,7 @@ var now = new Date().toISOString().replace(/:/g, '_');
 
 
 var logFileNew = ['../logs/compare-new-', now, '.log'].join('');
+var logFileNewThumbs = ['../logs/compare-thumbs-new-', now, '.log'].join('');
 var logFileModified = ['../logs/compare-modified-', now, '.log'].join('');
 
 function writeLog(logfile, item, callback){
@@ -36,7 +37,12 @@ function writeNew(array, callback){
 
 if (thumbs){
   return indexer.compareThumbs(src, dst, function (err, resp){
-    console.log(err, resp);
+    if (err) return console.log('error', err);
+
+    console.log('Done comparing, writing logfiles');
+    writeNew(resp.newFiles, function (){
+      console.log('Wrote', logFileNew, 'size:', resp.newFiles.length);
+    });
   })
 }
 
