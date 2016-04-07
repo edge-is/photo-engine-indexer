@@ -1,5 +1,6 @@
 module.exports = {
   index : 'index',
+  logdir : 'logs',
   elasticsearch : {
     host: 'localhost:9200'
   },
