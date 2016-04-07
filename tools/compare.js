@@ -41,7 +41,7 @@ if (thumbs){
 
     console.log('Done comparing, writing logfiles');
     writeNew(resp.newFiles, function (){
-      console.log('Wrote', logFileNew, 'size:', resp.newFiles.length);
+      console.log('Wrote', logFileNewThumbs, 'size:', resp.newFiles.length);
     });
   })
 }
@@ -55,7 +55,7 @@ indexer.compare(src, dst, function (err, resp){
   });
 
   writeModified(resp.modifiedFiles, function (){
-    console.log('Wrote', logFileNew, 'size:', resp.modifiedFiles.length);
+    console.log('Wrote', logFileModified, 'size:', resp.modifiedFiles.length);
   });
 
 })
