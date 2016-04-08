@@ -60,7 +60,7 @@ var options = {
 if (thumbs){
   return indexer.compareThumbs(src, dst, options, function (err, resp){
     if (err) return console.log('error', err);
-
+    console.log('\n\n');
     console.log('Done comparing, writing logfiles');
     writeNew(resp.newFiles, function (){
       console.log('Wrote', logFileNewThumbs, 'size:', resp.newFiles.length);
@@ -70,7 +70,7 @@ if (thumbs){
 
 indexer.compare(src, dst, options, function (err, resp){
   if (err) return console.log('error', err);
-
+  console.log('\n\n');
   console.log('Done comparing, writing logfiles');
   writeNew(resp.newFiles, function (){
     console.log('Wrote', logFileNew, 'size:', resp.newFiles.length);
