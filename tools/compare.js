@@ -9,6 +9,7 @@ var src = argv._[0];
 var dst = argv._[1];
 
 var thumbs = argv.t || false;
+var fileType = argv.e || 'jpg';
 
 var now = new Date().toISOString().replace(/:/g, '_');
 
@@ -34,9 +35,30 @@ function writeNew(array, callback){
   },callback)
 }
 
+if (!src || !dst){
+  return console.log([
+    'Src or dest neede',
+    'compare, "src" "dst" args'
+  ].join('\n'));
+}
+
+
+if (argv.h || argv.help){
+
+  return console.log([
+    'compare source destination',
+    '[-e (jpg)]'
+  ].join('\n'));
+}
+
+
+var options = {
+  fileType : fileType
+};
+
 
 if (thumbs){
-  return indexer.compareThumbs(src, dst, function (err, resp){
+  return indexer.compareThumbs(src, dst, options, function (err, resp){
     if (err) return console.log('error', err);
 
     console.log('Done comparing, writing logfiles');
@@ -46,7 +68,7 @@ if (thumbs){
   })
 }
 
-indexer.compare(src, dst, function (err, resp){
+indexer.compare(src, dst, options, function (err, resp){
   if (err) return console.log('error', err);
 
   console.log('Done comparing, writing logfiles');
