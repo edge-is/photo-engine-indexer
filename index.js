@@ -7,6 +7,8 @@ var path = require('path');
 var async = require('async');
 var argv = require('yargs').argv;
 
+var Pace = require('pace');
+
 var scanDir = argv.s || false;
 
 var logfile = argv.f || false;
@@ -40,6 +42,18 @@ function md5(string){
                .digest('hex');
 }
 
+// HACK
+function log (){
+
+  if (!argv.verbose) return;
+
+  var arg = [];
+
+  for (var key in arguments){
+    arg.push(arguments[key]);
+  }
+  console.log.apply(this, arg)
+}
 
 var expected_epochs = [
   "ProfileDateTime",
@@ -54,7 +68,7 @@ var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client(config.elasticsearch);
 
 if (!logfile && !scanDir && !worklog){
-  return console.log('Need to set scan directory(s), worklog(w) or logfile(f)');
+  return log('Need to set scan directory(s), worklog(w) or logfile(f)');
 }
 function GetConfig(path){
   try {
@@ -71,7 +85,7 @@ function es_errors(data, callback){
   var json = JSON.stringify(log)  + '\n';
 
   fs.appendFile('logs/es-errors.log', json, function (err, res){
-    if (err) console.log('Error reporting error', err);
+    if (err) log('Error reporting error', err);
 
     callback();
   })
@@ -85,7 +99,7 @@ function AddToWorklog(data, callback){
 
   fs.appendFile(worklog, string, function (err, res){
     if (err) {
-      console.log('Error appending to file', err);
+      log('Error appending to file', err);
       return callback(err);
     }
 
@@ -114,7 +128,7 @@ function jsonParse (string){
 function ReadLogFileSync(filename){
 
   if (!exists(filename)){
-    console.log('File does not exists', filename);
+    log('File does not exists', filename);
     return false;
   }
 
@@ -127,15 +141,15 @@ function ReadLogFileSync(filename){
 if (scanDir){
   logfile = logfile || scanLogFile;
 
-  if (typeof scanDir !=='string') return console.log('path needs to be string');
+  if (typeof scanDir !=='string') return log('path needs to be string');
 
-  if (!exists(scanDir)) return console.log('Path does not exist', scanDir);
+  if (!exists(scanDir)) return log('Path does not exist', scanDir);
 
   indexer.scan(scanDir, logfile, function (err, stats){
-    console.log('Search for files in ', scanDir);
+    log('Search for files in ', scanDir);
     if (!indexAfterScan){
       var total  = stats.folders.length + stats.files.length;
-      return console.log([
+      return log([
         '',
         'All done, log file is: ' + logfile,
         'Total files and folders ' + total
@@ -145,12 +159,12 @@ if (scanDir){
     IndexArray(stats.files);
   });
 }else if ((typeof worklog === 'string') && !scanDir){
-  console.log('Starting from crash reading', worklog);
+  log('Starting from crash reading', worklog);
 
   var array = ReadLogFileSync(worklog);
   /**FIXME need to finish this part**/
 }else if ((typeof logfile === 'string') && !scanDir ){
-  console.log('Starting from logfile...', logfile);
+  log('Starting from logfile...', logfile);
   var array = ReadLogFileSync(logfile);
   if (array && array.length > 0){
     IndexArray(array);
@@ -171,12 +185,22 @@ function getArchivename(filepath){
   return parts.pop();
 }
 
+var dummypace = {
+  op : function (){}
+};
+
 function IndexArray(array, callback){
   var workers = config.workers || 4;
 
 
   callback = callback || function (){};
-  console.log('Starting indexing files with workers', workers , array.length);
+  log('Starting indexing files with workers', workers , array.length);
+
+  var pace = dummypace;
+  if (!argv.verbose){
+    pace = new Pace(array.length);
+  }
+
 
   async.forEachLimit(array, workers, function (item, next){
     var file = item.path;
@@ -187,7 +211,7 @@ function IndexArray(array, callback){
       var archive = getArchivename(file);
       return exif.get(file, function (err, metadata){
         if (err) {
-          console.log('error getting metadata', file, err);
+          log('error getting metadata', file, err);
           return next();
         }
 
@@ -201,18 +225,23 @@ function IndexArray(array, callback){
 
         indexToElasticsearch(obj, fileId, function (err, resp){
           var now = + new Date();
-          AddToWorklog({ file : file, date : now }, next);
+          AddToWorklog({ file : file, date : now }, function (err, res){
+            next(err);
+
+            pace.op();
+
+          });
           //
         });
       });
     }
 
-    console.log('NOT AN IMAGE', item.path)
+    log('NOT AN IMAGE', item.path)
     return next();
 
 
   }, function (){
-    console.log('Array is done', {
+    log('Array is done', {
       worklog : workLogFile,
       scanlog : scanLogFile
     });
@@ -273,10 +302,10 @@ function indexToElasticsearch(data, id,  callback){
 
   client.index(body, function (err, data){
     if (err) {
-      console.log(err);
+      log(err);
       return  es_errors(body, callback)
     }
-    console.log('Indexed to ', body.index, 'and type', body.type, 'with id', id);
+    log('Indexed to ', body.index, 'and type', body.type, 'with id', id);
 
     callback(null, data);
 
