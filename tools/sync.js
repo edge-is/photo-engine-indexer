@@ -60,7 +60,7 @@ var client = new elasticsearch.Client(config.elasticsearch);
 if (typeof scanDir === 'string'){
   //return console.log('Starting scan of dir.. not implemented');
 
-
+  console.log('Starting scan of:', scanDir);
   indexer.scan(scanDir, scanlog, function (err, stats){
     var total  = stats.folders.length + stats.files.length;
     console.log([
