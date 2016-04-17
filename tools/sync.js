@@ -177,7 +177,7 @@ function syncStart(array, callback){
 
   var noneExisting = [];
 
-  console.log('Starting' array.length);
+  console.log('Starting', array.length);
 
   async.forEachLimit(array, 4, function (item, next){
 
