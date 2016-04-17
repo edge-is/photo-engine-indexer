@@ -62,6 +62,8 @@ if (typeof scanDir === 'string'){
 
   console.log('Starting scan of:', scanDir);
   indexer.scan(scanDir, scanlog, function (err, stats){
+    if (err) return console.log('Error reading files', err);
+
     var total  = stats.folders.length + stats.files.length;
     console.log([
       '',
