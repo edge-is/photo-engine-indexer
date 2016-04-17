@@ -36,6 +36,20 @@ var scanLogFile = ['logs/', 'scan-all-', now, '.log'].join('');
 
 var crypto = require('crypto');
 
+if (argv.h  || argv.help){
+  return console.log([
+    '-s /dir/',
+    '-f /log/file/containing/files/to/index',
+    '-i index after scan',
+    '-w worklog'
+  ].join('\n'));
+}
+
+if (!argv.s && !argv.f){
+  return console.log('Arguments needed, use -h for help');
+}
+
+
 function md5(string){
   return crypto.createHash('md5')
                .update(string)
