@@ -69,6 +69,7 @@ if (typeof scanDir === 'string'){
       'Total files and folders ' + total
     ].join('\n'));
 
+    console.log('Found:', stats.files, 'files');
     syncStart(stats.files, function (err, res){
       console.log('Done', err);
     });
