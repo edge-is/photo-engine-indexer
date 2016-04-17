@@ -164,7 +164,7 @@ function es_exists(index, type, id, callback){
     if (exists === true) {
       return callback(null, true);
     }
-    callback('does not exists');
+    callback(null, false);
   });
 }
 
@@ -177,6 +177,7 @@ function syncStart(array, callback){
 
   var noneExisting = [];
 
+  console.log('Starting' array.length);
 
   async.forEachLimit(array, 4, function (item, next){
 
@@ -187,7 +188,7 @@ function syncStart(array, callback){
     es_exists(index, 'image', slugged, function (err, res){
       if (err) return next(err);
 
-      if(res === true){
+      if(res === false){
         console.log(filename, slugged, 'does not exist');
         noneExisting.push(item);
         return logToFile(item, next);
