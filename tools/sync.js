@@ -154,15 +154,17 @@ function logToFile(data, callback){
 }
 
 function es_exists(index, type, id, callback){
-  client.get({
+
+  client.exists({
     index: index,
     type: type,
     id: id
-  }, function (error, response) {
-    if (response.found === false) return callback(true, response);
-
-    if (error) console.error('Unkown error', error);
-    callback(error, response);
+  }, function (error, exists) {
+    if(error) return callback(error);
+    if (exists === true) {
+      return callback(null, true);
+    }
+    callback('does not exists');
   });
 }
 
@@ -183,7 +185,9 @@ function syncStart(array, callback){
     var filename = item.stats.name.split('.').shift();
     var slugged = slug(filename);
     es_exists(index, 'image', slugged, function (err, res){
-      if (err === true) {
+      if (err) return next(err);
+
+      if(res === true){
         console.log(filename, slugged, 'does not exist');
         noneExisting.push(item);
         return logToFile(item, next);
