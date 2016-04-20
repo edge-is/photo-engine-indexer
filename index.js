@@ -6,6 +6,8 @@ var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var argv = require('yargs').argv;
+var Iconv  = require('iconv').Iconv;
+var iconv = new Iconv('latin1', 'utf-8');
 
 var Pace = require('pace');
 
@@ -215,7 +217,6 @@ function IndexArray(array, callback){
     pace = new Pace(array.length);
   }
 
-
   async.forEachLimit(array, workers, function (item, next){
     var file = item.path;
     var parsed = path.parse(file);
@@ -235,7 +236,9 @@ function IndexArray(array, callback){
           obj.indexed_epoch = now;
           obj.archive = archive;
           obj.filename = parsed.name;
+          obj.archive_id = md5(archive);
         }
+
 
         indexToElasticsearch(obj, fileId, function (err, resp){
           var now = + new Date();
@@ -301,9 +304,7 @@ function enforceEpochs(data){
 
   return data;
 }
-
 function indexToElasticsearch(data, id,  callback){
-
   data = deleteNoIndexFields(data);
 
   data = enforceEpochs(data);
