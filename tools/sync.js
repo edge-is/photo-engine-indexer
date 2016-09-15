@@ -193,14 +193,9 @@ function syncStart(array, callback){
 
   console.log('After cleaning:', array.length);
 
-
-  return;
   if (fromTimestamp){
     array = onlyNewItems(array, fromTimestamp);
   }
-
-
-
 
   var noneExisting = [];
 
