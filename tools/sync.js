@@ -171,12 +171,33 @@ function es_exists(index, type, id, callback){
   });
 }
 
+function cleanList(array){
+  var allowed = ['tif','jpg','jpeg','gif','png'];
+
+  return array.filter(function (item){
+    var parsed = path.parse(item.path);
+
+    if (allowed.indexOf(parsed.ext) > -1){
+      return true;
+    }
+    return false;
+
+  });
+}
+
 function syncStart(array, callback){
   callback = callback || function (){};
+
+  array = cleanList(array);
+
+  console.log('After cleaning:', array.length);
 
   if (fromTimestamp){
     array = onlyNewItems(array, fromTimestamp);
   }
+
+
+
 
   var noneExisting = [];
 
